@@ -8,6 +8,7 @@ import 'opportunity_detail_screen.dart';
 import 'auth_screen.dart';
 import 'my_applications_screen.dart';
 import 'bookmarks_screen.dart';
+import 'startup_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,6 +30,16 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Opportunities'),
         actions: [
+          if (isStartup)
+            IconButton(
+              icon: const Icon(Icons.business),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StartupProfileScreen()),
+                );
+              },
+            ),
           if (!isStartup)
             IconButton(
               icon: const Icon(Icons.bookmark),
