@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart' as app_auth;
+import '../providers/theme_provider.dart';
 import '../services/opportunity_service.dart';
 import '../models/opportunity.dart';
 import '../main.dart';
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<app_auth.AuthProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final opportunityService = OpportunityService();
     final isStartup = auth.currentUser?.role == 'startup';
 
@@ -42,6 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('🎯 Opportunities'),
         actions: [
+          IconButton(
+            icon: Icon(
+              themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () => themeProvider.toggleTheme(),
+          ),
           if (isStartup)
             IconButton(
               icon: const Icon(Icons.business),
