@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../providers/auth_provider.dart' as app_auth;
 import '../models/opportunity.dart';
+import '../main.dart';
 
 class OpportunityDetailScreen extends StatefulWidget {
   final Opportunity opportunity;
@@ -19,6 +20,16 @@ class _OpportunityDetailScreenState extends State<OpportunityDetailScreen> {
   bool checkingStatus = true;
   bool bookmarked = false;
   String? bookmarkDocId;
+
+  final categoryColors = {
+    'Development': const Color(0xFF6C4AB6),
+    'Design': const Color(0xFFFF7A59),
+    'Marketing': const Color(0xFF2ED9C3),
+    'Business': const Color(0xFFFFC93C),
+    'Content': const Color(0xFFFF6B9D),
+  };
+
+  Color get color => categoryColors[widget.opportunity.category] ?? AppColors.primary;
 
   @override
   void initState() {
@@ -110,40 +121,119 @@ class _OpportunityDetailScreenState extends State<OpportunityDetailScreen> {
     final isStudent = auth.currentUser?.role == 'student';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.opportunity.title),
-        actions: [
-          if (isStudent)
-            IconButton(
-              icon: Icon(bookmarked ? Icons.bookmark : Icons.bookmark_border),
-              onPressed: toggleBookmark,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 160,
+            pinned: true,
+            backgroundColor: color,
+            actions: [
+              if (isStudent)
+                IconButton(
+                  icon: Icon(
+                    bookmarked ? Icons.bookmark : Icons.bookmark_border,
+                    color: Colors.white,
+                  ),
+                  onPressed: toggleBookmark,
+                ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.only(left: 16, bottom: 16, right: 50),
+              title: Text(
+                widget.opportunity.title,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [color, color.withOpacity(0.7)],
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(Icons.work_outline, color: Colors.white24, size: 72),
+                ),
+              ),
             ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          widget.opportunity.category,
+                          style: TextStyle(
+                              color: color, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      const Icon(Icons.business, size: 18, color: Colors.grey),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Posted by ${widget.opportunity.startupName}',
+                        style: const TextStyle(
+                            color: Colors.grey, fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Description',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.opportunity.description,
+                    style: const TextStyle(fontSize: 15, height: 1.5),
+                  ),
+                  const SizedBox(height: 30),
+                  if (isStudent)
+                    checkingStatus
+                        ? const Center(child: CircularProgressIndicator())
+                        : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: applied || loading ? null : apply,
+                              icon: loading
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                          color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : Icon(applied
+                                      ? Icons.check_circle
+                                      : Icons.send),
+                              label: Text(applied ? 'Applied' : 'Apply Now'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    applied ? Colors.green : AppColors.secondary,
+                              ),
+                            ),
+                          ),
+                ],
+              ),
+            ),
+          ),
         ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.opportunity.category,
-                style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 6),
-            Text('Posted by ${widget.opportunity.startupName}',
-                style: const TextStyle(fontStyle: FontStyle.italic)),
-            const SizedBox(height: 20),
-            Text(widget.opportunity.description),
-            const Spacer(),
-            if (isStudent)
-              checkingStatus
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: applied || loading ? null : apply,
-                      child: loading
-                          ? const CircularProgressIndicator()
-                          : Text(applied ? 'Applied ✓' : 'Apply'),
-                    ),
-          ],
-        ),
       ),
     );
   }
