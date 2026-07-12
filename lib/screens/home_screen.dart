@@ -11,6 +11,7 @@ import 'auth_screen.dart';
 import 'my_applications_screen.dart';
 import 'bookmarks_screen.dart';
 import 'startup_profile_screen.dart';
+import 'student_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,6 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Color colorFor(String category) =>
       categoryColors[category] ?? AppColors.primary;
+
+  String getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
+    return '?';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +90,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(builder: (_) => const MyApplicationsScreen()),
                 );
               },
+            ),
+          if (!isStartup)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const StudentProfileScreen()),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 15,
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    getInitials(auth.currentUser?.name ?? '?'),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
             ),
           IconButton(
             icon: const Icon(Icons.logout),
